@@ -9,13 +9,31 @@ con el backend de inventario de Daluzed Pastelería.
 
 ## Información general
 
-| Parámetro         | Valor                          |
-|-------------------|--------------------------------|
-| URL base          | `http://127.0.0.1:8000/api`    |
-| Formato de datos  | JSON                           |
-| Autenticación     | Bearer Token (Laravel Sanctum) |
-| Expiración token  | 30 minutos                     |
-| Encoding          | UTF-8                          |
+| Parámetro         | Valor                             |
+|-------------------|-----------------------------------|
+| URL base          | `http://127.0.0.1:8000/api/v1`    |
+| Versión actual    | `v1`                              |
+| Formato de datos  | JSON                              |
+| Autenticación     | Bearer Token (Laravel Sanctum)    |
+| Expiración token  | 30 minutos                        |
+| Encoding          | UTF-8                             |
+
+---
+
+## Versionamiento
+
+La API utiliza **versionamiento por URL**. La versión se incluye directamente en el path:
+
+```
+/api/{version}/{recurso}
+```
+
+| Versión | Estado   | URL base                        |
+|---------|----------|---------------------------------|
+| `v1`    | Activa   | `http://127.0.0.1:8000/api/v1`  |
+
+Cuando se lance una nueva versión (`v2`), la `v1` seguirá operativa durante un periodo
+de transición para no romper clientes existentes.
 
 ---
 
@@ -79,7 +97,7 @@ El backend siempre responde en JSON con esta estructura:
 
 ## Módulo de Autenticación
 
-Base: `/api/auth`
+Base: `/api/v1/auth`
 
 ---
 
@@ -88,7 +106,7 @@ Base: `/api/auth`
 Autentica al usuario y retorna un token de acceso.
 
 ```
-POST /api/auth/login
+POST /api/v1/auth/login
 ```
 
 **Acceso:** Público — no requiere token.
@@ -159,7 +177,7 @@ POST /api/auth/login
 Revoca el token del usuario autenticado y cierra la sesión.
 
 ```
-POST /api/auth/logout
+POST /api/v1/auth/logout
 ```
 
 **Acceso:** Requiere token.
@@ -197,7 +215,7 @@ Authorization: Bearer {token}
 Retorna el perfil del usuario dueño del token.
 
 ```
-GET /api/auth/me
+GET /api/v1/auth/me
 ```
 
 **Acceso:** Requiere token.
@@ -239,7 +257,7 @@ Authorization: Bearer {token}
 Crea un nuevo usuario en el sistema.
 
 ```
-POST /api/auth/usuarios
+POST /api/v1/auth/usuarios
 ```
 
 **Acceso:** Requiere token + rol `administrador`.
@@ -321,7 +339,7 @@ El campo `rol` identifica los permisos del usuario en toda la app.
 ## Flujo de autenticación recomendado
 
 ```
-1. POST /api/auth/login
+1. POST /api/v1/auth/login
       └── Guardar token y rol en el cliente (localStorage, cookie, etc.)
 
 2. Todas las demás peticiones
@@ -330,7 +348,7 @@ El campo `rol` identifica los permisos del usuario en toda la app.
 3. Si el backend responde HTTP 401
       └── El token expiró → redirigir al login
 
-4. POST /api/auth/logout
+4. POST /api/v1/auth/logout
       └── Eliminar token guardado en el cliente
 ```
 
@@ -367,7 +385,7 @@ Al recibir la respuesta:
 ## Ejemplo de implementación en JavaScript
 
 ```javascript
-const API_URL = 'http://127.0.0.1:8000/api';
+const API_URL = 'http://127.0.0.1:8000/api/v1';
 
 // ── Login ────────────────────────────────────────────────────────────────────
 async function login(email, password) {

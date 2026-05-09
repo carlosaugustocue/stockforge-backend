@@ -47,7 +47,7 @@ function crearUsuario(string $rolNombre, array $extra = []): User
 test('test_login_exitoso_retorna_token', function () {
     $usuario = crearUsuario(Role::ADMINISTRADOR);
 
-    $response = $this->postJson('/api/auth/login', [
+    $response = $this->postJson('/api/v1/auth/login', [
         'email'    => $usuario->email,
         'password' => 'Password123!',
     ]);
@@ -74,7 +74,7 @@ test('test_login_exitoso_retorna_token', function () {
 test('test_login_con_credenciales_invalidas_retorna_401', function () {
     $usuario = crearUsuario(Role::GERENCIA);
 
-    $response = $this->postJson('/api/auth/login', [
+    $response = $this->postJson('/api/v1/auth/login', [
         'email'    => $usuario->email,
         'password' => 'contraseña_incorrecta',
     ]);
@@ -93,14 +93,14 @@ test('test_bloqueo_tras_cinco_intentos_fallidos', function () {
 
     // Realizar 5 intentos fallidos consecutivos
     for ($i = 0; $i < 5; $i++) {
-        $this->postJson('/api/auth/login', [
+        $this->postJson('/api/v1/auth/login', [
             'email'    => $usuario->email,
             'password' => 'contraseña_incorrecta',
         ]);
     }
 
     // En el 6° intento la cuenta ya debe estar bloqueada
-    $response = $this->postJson('/api/auth/login', [
+    $response = $this->postJson('/api/v1/auth/login', [
         'email'    => $usuario->email,
         'password' => 'Password123!', // Contraseña correcta, pero bloqueada
     ]);
@@ -116,7 +116,7 @@ test('test_usuario_inactivo_no_puede_iniciar_sesion', function () {
     // Crear usuario con activo = false
     $usuario = crearUsuario(Role::ENCARGADO_INVENTARIOS, ['activo' => false]);
 
-    $response = $this->postJson('/api/auth/login', [
+    $response = $this->postJson('/api/v1/auth/login', [
         'email'    => $usuario->email,
         'password' => 'Password123!',
     ]);
@@ -137,7 +137,7 @@ test('test_logout_revoca_token', function () {
 
     // Hacer logout — debe retornar 200
     $this->withToken($token)
-        ->postJson('/api/auth/logout')
+        ->postJson('/api/v1/auth/logout')
         ->assertStatus(200);
 
     // Verificar que el token fue eliminado físicamente de la base de datos (RFAUT03).
@@ -155,7 +155,7 @@ test('test_endpoint_me_retorna_usuario_autenticado', function () {
     $token = $usuario->createToken('api-token')->plainTextToken;
 
     $response = $this->withToken($token)
-        ->getJson('/api/auth/me');
+        ->getJson('/api/v1/auth/me');
 
     $response->assertStatus(200)
         ->assertJsonPath('data.email', $usuario->email)
@@ -172,7 +172,7 @@ test('test_rol_gerencia_no_puede_crear_usuarios', function () {
     $rolAdmin = Role::where('nombre', Role::ADMINISTRADOR)->first();
 
     $response = $this->withToken($token)
-        ->postJson('/api/auth/usuarios', [
+        ->postJson('/api/v1/auth/usuarios', [
             'name'                  => 'Nuevo Usuario',
             'email'                 => 'nuevo@inventario.test',
             'password'              => 'Password123!',
@@ -194,7 +194,7 @@ test('test_rol_administrador_puede_crear_usuarios', function () {
     $rolGerencia = Role::where('nombre', Role::GERENCIA)->first();
 
     $response = $this->withToken($token)
-        ->postJson('/api/auth/usuarios', [
+        ->postJson('/api/v1/auth/usuarios', [
             'name'                  => 'Nuevo Gerente',
             'email'                 => 'gerente.nuevo@inventario.test',
             'password'              => 'Password123!',
