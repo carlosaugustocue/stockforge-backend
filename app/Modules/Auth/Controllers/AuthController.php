@@ -58,7 +58,9 @@ class AuthController extends Controller
             ], 'Inicio de sesión exitoso.');
 
         } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage(), (int) ($e->getCode() ?: 401));
+            $code = $e->getCode();
+            $httpCode = (is_int($code) && $code >= 100 && $code < 600) ? $code : 401;
+            return $this->errorResponse($e->getMessage(), $httpCode);
         }
     }
 
